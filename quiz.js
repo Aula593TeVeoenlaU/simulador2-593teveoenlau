@@ -48,13 +48,7 @@ const questions = [
 ];
 
 
-// Mapeo de puntajes (sin cambios)
-const scoreMap = {
-    0: 0, 1: 500, 2: 570, 3: 635, 4: 695, 5: 750,
-    6: 800, 7: 845, 8: 885, 9: 915, 10: 945, 11: 970, 12: 1000, 13: 1000, 14: 1000, 15: 1000
-};
-
-// Variables globales (sin cambios)
+// Variables globales
 let currentQuestionIndex = 0;
 let timerInterval;
 const totalTime = 18 * 60; // 18 minutos
@@ -113,7 +107,6 @@ function renderNavigation() {
     });
 }
 
-// ===== FUNCIÓN RENDERQUESTION ACTUALIZADA =====
 function renderQuestion(index) {
     currentQuestionIndex = index;
     const container = document.getElementById('question-container');
@@ -123,7 +116,6 @@ function renderQuestion(index) {
     const questionDiv = document.createElement('div');
     questionDiv.className = 'question active';
 
-    // Lógica para manejar texto antes y después de la imagen
     let html = `<h3>Pregunta ${q.id}.</h3><p>${q.text}</p>`;
 
     if (q.image) {
@@ -135,7 +127,6 @@ function renderQuestion(index) {
         html += `<p>${q.textAfterImage}</p>`;
     }
 
-    // Si existe una imagen de opciones agrupadas, la mostramos aquí
     if (q.imageOptionsGroup) {
         html += `<div class="image-container"><img src="${q.imageOptionsGroup}" alt="Opciones para el ejercicio ${q.id}" style="max-width: 400px;"></div>`;
     }
@@ -257,6 +248,36 @@ function calculateResults() {
     return { correctAnswers, totalQuestions: questions.length };
 }
 
+
+// ==========================================================
+// ===== SECCIÓN DE CALIFICACIÓN (CORREGIDA Y AUTOMÁTICA) =====
+// ==========================================================
+/**
+ * Calcula la puntuación final basada en una fórmula dinámica.
+ * @param {number} correctAnswers - El número de respuestas correctas.
+ * @param {number} totalQuestions - El número total de preguntas en el examen.
+ * @returns {number} La puntuación final redondeada.
+ */
+function calculateFinalScore(correctAnswers, totalQuestions) {
+    const baseScore = 425;
+    const pointsToDistribute = 575; // Esto es la diferencia: 1000 (máximo) - 425 (base)
+
+    // Evita la división por cero si el examen no tuviera preguntas
+    if (totalQuestions === 0) {
+        return baseScore;
+    }
+
+    // Calcula cuántos puntos vale cada respuesta correcta usando una regla de tres
+    const pointsPerCorrectAnswer = pointsToDistribute / totalQuestions;
+
+    // Calcula la puntuación final
+    const finalScore = baseScore + (correctAnswers * pointsPerCorrectAnswer);
+
+    // Redondea al entero más cercano y se asegura de que no pase de 1000
+    return Math.min(Math.round(finalScore), 1000);
+}
+
+
 function displayResultsPage() {
     const existingAdjustedScore = document.querySelector('.adjusted-score-display');
     if (existingAdjustedScore) {
@@ -265,13 +286,18 @@ function displayResultsPage() {
     const results = calculateResults();
     const resultsScoreEl = document.querySelector('.results-score');
     resultsScoreEl.textContent = `Aciertos: ${results.correctAnswers} / ${results.totalQuestions} (${(results.correctAnswers / results.totalQuestions * 100).toFixed(1)}%)`;
-    const adjustedScore = scoreMap[Math.min(results.correctAnswers, 15)] || 0;
+    
+    // ===== LÍNEA MODIFICADA =====
+    // Ahora llama a la nueva función en lugar de usar el scoreMap
+    const adjustedScore = calculateFinalScore(results.correctAnswers, results.totalQuestions);
+
     const adjustedScoreEl = document.createElement('p');
     adjustedScoreEl.className = 'results-score adjusted-score-display';
     adjustedScoreEl.style.marginTop = '15px';
     adjustedScoreEl.style.fontSize = '2.8em';
     adjustedScoreEl.innerHTML = `Puntuación Final: <strong style="color: var(--accent-color);">${adjustedScore} / 1000</strong>`;
     resultsScoreEl.parentNode.insertBefore(adjustedScoreEl, resultsScoreEl.nextSibling);
+
     const resultsContent = document.getElementById('results-content');
     resultsContent.innerHTML = '';
     questions.forEach(q => {
@@ -288,7 +314,6 @@ function displayResultsPage() {
         if (q.textAfterImage) {
             html += `<p>${q.textAfterImage}</p>`;
         }
-        // También mostramos la imagen de opciones agrupadas en los resultados si existe
         if (q.imageOptionsGroup) {
             html += `<div class="image-container"><img src="${q.imageOptionsGroup}" alt="Opciones para el ejercicio ${q.id}" style="max-width: 400px;"></div>`;
         }
@@ -343,7 +368,7 @@ function displayResultsPage() {
 
 
 // ==========================================================
-// ===== SECCIÓN CORREGIDA: GUARDAR, RESTAURAR Y CIERRE =====
+// ===== SECCIÓN DE GUARDADO, RESTAURACIÓN Y CIERRE (SIN CAMBIOS) =====
 // ==========================================================
 function saveProgress() {
     if (!isQuizActive || isQuizSubmitted) return;
@@ -387,7 +412,6 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
 });
 
-// 1. ADVERTENCIA: Se ejecuta ANTES de que el usuario abandone la página.
 window.addEventListener("beforeunload", (e) => {
     if (isQuizActive && !isQuizSubmitted) {
         const confirmationMessage = '¡Atención! Si cierras o recargas la pestaña, tu intento se enviará automáticamente. ¿Estás seguro?';
@@ -396,7 +420,6 @@ window.addEventListener("beforeunload", (e) => {
     }
 });
 
-// 2. ACCIÓN FINAL: Se ejecuta cuando el usuario abandona la página (más fiable que 'unload').
 window.addEventListener("pagehide", () => {
     if (isQuizActive && !isQuizSubmitted) {
         saveProgress();
