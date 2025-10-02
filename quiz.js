@@ -37,7 +37,7 @@ const questions = [
         options: ['a) Opción 1', 'b) Opción 2', 'c) Opción 3', 'd) Opción 4'],
         answer: 'b' // La respuesta correcta sigue siendo la 'b'
     },
-    { id: 10, block: 'APTITUD ESPACIAL', text: 'Elige la figura que no pertenece a esta categoría:', image: 'imagenes/pregunta10_categoria.jpg', imageStyle: 'max-width: 450px;', options: ['a) Figura 1', 'b) Figura 2', 'c) Figura 3', 'd) Figura 4'], answer: 'b' },
+    { id: 10, block: 'APTITUD ESPACIAL', text: 'Elige la figura que no pertenece a esta categoría:', image: 'imagenes/pregunta10_categoria.jpg', imageStyle: 'max-width: 450px;', options: ['a) Figura 1', 'b) Figura 2', 'c) Figura 3', 'd) Figura 4'], answer: 'c' },
 
     // APTITUD VERBAL
     { id: 11, block: 'APTITUD VERBAL', text: '<b>Considere el siguiente texto:</b><br><i>Aunque parezca paradójico, los mensajes más cotidianos son los más difíciles de descifrar porque el hablante, dada la poca trascendencia del mensaje o la rapidez con que debe pensarlo, no tiene mucho tiempo para reflexionar sobre él.</i><br>Según el texto, ¿cuáles palabras son equivalentes a “paradójico” y “trascendencia”?', options: ['a) absurdo-importancia', 'b) controversial-eficacia', 'c) incomprensible-necesidad', 'd) cuestionable-consecuencia'], answer: 'a' },
@@ -401,4 +401,5 @@ window.addEventListener("pagehide", () => {
     if (isQuizActive && !isQuizSubmitted) {
         saveProgress();
     }
+
 });
